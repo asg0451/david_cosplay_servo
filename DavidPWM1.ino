@@ -21,6 +21,9 @@ Servo right;
 static int buttonRight = 12;
 static int buttonLeft = 11;
 
+static int rightLED = 7;
+static int leftLED = 6;
+
 State rstate;
 State lstate;
 
@@ -39,7 +42,8 @@ void setup() {
   right.attach(10);
   pinMode(buttonRight, INPUT);  
   pinMode(buttonLeft, INPUT);
-  pinMode(13, OUTPUT);
+  pinMode(leftLED, OUTPUT);
+  pinMode(rightLED, OUTPUT);
   rstate = chilling;
   lstate = chilling;
   rightServoPrevState = opened;
@@ -52,8 +56,8 @@ void setup() {
 }
 
 void rightLoop() {
-  if(rstate == travelling) { digitalWrite(13, HIGH); }
-  else { digitalWrite(13, LOW); }
+  if(rstate == travelling) { digitalWrite(rightLED, HIGH); }
+  else { digitalWrite(rightLED, LOW); }
   
   if(rstate == travelling) {
     if(getServoState(right) == closed && rightServoPrevState == opened) { 
@@ -77,8 +81,8 @@ void rightLoop() {
 
 
 void leftLoop() {
-  if(lstate == travelling) { digitalWrite(13, HIGH); }
-  else { digitalWrite(13, LOW); }
+  if(lstate == travelling) { digitalWrite(leftLED, HIGH); }
+  else { digitalWrite(leftLED, LOW); }
   
   if(lstate == travelling) {
     if(getServoState(left) == closed && leftServoPrevState == opened) { 

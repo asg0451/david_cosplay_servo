@@ -13,34 +13,42 @@ enum State {
 };
 
 static int CLOSED_POS = 180;
-static int OPENED_POS = 0;
+static int OPENED_POS = 100;
 
 Servo left;
 Servo right;
 
 static int buttonRight = 12;
+static int buttonLeft = 11;
 
 State rstate;
 State lstate;
 
 ServoState rightServoPrevState;
+ServoState leftServoPrevState;
 
 ServoState getServoState(Servo s) {
   int val = s.read();
   if(val <= 180 && val >= 170) { return closed; };
-  if(val <= 10 && val >= 0) { return opened; }
+  if(val <= OPENED_POS + 10 && val >= OPENED_POS) { return opened; }
   return somewhere;
 }
 
 void setup() {
   left.attach(9);
   right.attach(10);
-  pinMode(buttonRight, INPUT);
+  pinMode(buttonRight, INPUT);  
+  pinMode(buttonLeft, INPUT);
   pinMode(13, OUTPUT);
   rstate = chilling;
-  rightServoPrevState = opened;
   lstate = chilling;
+  rightServoPrevState = opened;
+  leftServoPrevState = opened;
   right.write(CLOSED_POS);
+  left.write(CLOSED_POS);
+
+
+   pinMode(6, OUTPUT);
 }
 
 void rightLoop() {
@@ -58,9 +66,6 @@ void rightLoop() {
       rightServoPrevState = opened;
       rstate = chilling;
     }
-//    else {
-//      rstate = chilling; 
-//    }
   }
   else {
     // pushed for first time
@@ -71,7 +76,31 @@ void rightLoop() {
 }
 
 
+void leftLoop() {
+  if(lstate == travelling) { digitalWrite(13, HIGH); }
+  else { digitalWrite(13, LOW); }
+  
+  if(lstate == travelling) {
+    if(getServoState(left) == closed && leftServoPrevState == opened) { 
+      left.write(OPENED_POS);
+      leftServoPrevState = closed; 
+      lstate = chilling;
+    } 
+    else if(getServoState(left) == opened && leftServoPrevState == closed) { 
+      left.write(CLOSED_POS); 
+      leftServoPrevState = opened;
+      lstate = chilling;
+    }
+  }
+  else {
+    // pushed for first time
+    if(digitalRead(buttonLeft) == HIGH) {
+      lstate = travelling;
+    }
+  }
+}
 void loop() {
   rightLoop();  
-  delay(200);
+  leftLoop();
+  delay(300);
 }
